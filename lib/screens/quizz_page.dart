@@ -33,32 +33,59 @@ class _QuizPageState extends State<QuizPage> {
     final isCorrect = _questions[_currentQuestionIndex].isCorrect == userChoice;
     setState(() {
       if (isCorrect) _score++;
+
       if (_currentQuestionIndex < _questions.length - 1) {
         _currentQuestionIndex++;
       } else {
         // Quiz terminé
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Quiz terminé!'),
-            content: Text('Score final: $_score/${_questions.length}'),
-            actions: [
-              TextButton(
-                child: const Text('Recommencer'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    _currentQuestionIndex = 0;
-                    _score = 0;
-                  });
-                },
-              ),
-            ],
-          ),
-        );
+
+        if (_score == 3) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Quiz terminé!'),
+              content: Text('Score final: $_score/${_questions.length}'),
+              actions: [
+                TextButton(
+                  child: const Text('Terminer'),
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed('/');
+                    setState(() {
+                      _currentQuestionIndex = 0;
+                      _score = 0;
+                    });
+                    return; // Arrête la suite de l'exécution pour éviter des comportements inattendus
+                  },
+                ),
+              ],
+            ),
+          );
+        }else {
+          showDialog(
+            context: context,
+            builder: (context) =>
+                AlertDialog(
+                  title: const Text('Quiz terminé!'),
+                  content: Text('Score final: $_score/${_questions.length}'),
+                  actions: [
+                    TextButton(
+                      child: const Text('Recommencer'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          _currentQuestionIndex = 0;
+                          _score = 0;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+          );
+        }
       }
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
