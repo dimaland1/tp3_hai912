@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tp1_hai912i/screens/quizz_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'screens/quiz_page_bloc.dart';
 import 'screens/profile_page.dart';
 
 void main() => runApp(const MyApp());
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const ProfileHomePage(),
-        '/quiz': (context) => const QuizPage(title: 'Questions/Réponses'),
+        '/quiz': (context) => const QuizPageBloc(title: 'Questions/Réponses'),
       },
     );
   }
