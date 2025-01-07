@@ -1,27 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/quiz_bloc.dart';
-import '../blocs/quiz_event.dart';
-import '../blocs/quiz_state.dart';
+import '../../busines_logic/blocs/quiz_bloc.dart';
+import '../../busines_logic/events/quiz_event.dart';
+import '../../busines_logic/blocs/quiz_state.dart';
+import '../../services/sound_service.dart';
+import '../../services/analytics_service.dart';
 
 class QuizPageBloc extends StatelessWidget {
+  final String themeId;
   final String title;
 
-  const QuizPageBloc({Key? key, required this.title}) : super(key: key);
+  const QuizPageBloc({
+    Key? key,
+    required this.themeId,
+    required this.title,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => QuizBloc(),
-      child: _QuizPageContent(title: title),
+      create: (context) => QuizBloc(themeId: themeId)..add(LoadQuestionsEvent()),
+      child: _QuizPageContent(title: title, themeId: themeId),
     );
   }
 }
 
 class _QuizPageContent extends StatelessWidget {
   final String title;
+  final String themeId;
 
-  const _QuizPageContent({Key? key, required this.title}) : super(key: key);
+  const _QuizPageContent({
+    Key? key,
+    required this.title,
+    required this.themeId,
+  }) : super(key: key);
+
+  void _logQuizResults(QuizState state) {
+    AnalyticsService.logQuizCompleted(
+      themeId: themeId,
+      score: state.score,
+      totalQuestions: state.questions.length,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +58,22 @@ class _QuizPageContent extends StatelessWidget {
           }
         },
         builder: (context, state) {
-          final currentQuestion = state.questions[state.currentQuestionIndex];
+          if (state.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            );
+          }
 
+          if (state.questions.isEmpty) {
+            return const Center(
+              child: Text(
+                'Aucune question disponible',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            );
+          }
+
+          final currentQuestion = state.questions[state.currentQuestionIndex];
           return Container(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -89,23 +123,33 @@ class _QuizPageContent extends StatelessWidget {
   }
 
   void _showResultDialog(BuildContext context, QuizState state) {
+    final isVictory = state.score == state.questions.length;
+    SoundService.playSound(isVictory);
+    _logQuizResults(state);
+
+    if (isVictory) {
+      AnalyticsService.setUserPreferredTheme(themeId);
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Quiz terminé!'),
-        content: Text('Score final: ${state.score}/${state.questions.length}'),
+        title: Text(isVictory ? 'Victoire !' : 'Quiz terminé'),
+        content: Text('Score: ${state.score}/${state.questions.length}'),
         actions: [
           TextButton(
-            child: Text(state.score == 3 ? 'Terminer' : 'Recommencer'),
+            child: Text('Recommencer'),
             onPressed: () {
               Navigator.of(dialogContext).pop();
-
-              if (state.score == 3) {
-                Navigator.of(context).pushReplacementNamed('/');
-              }
-
               context.read<QuizBloc>().add(ResetQuizEvent());
+            },
+          ),
+          TextButton(
+            child: Text('Terminer'),
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pushReplacementNamed('/');
             },
           ),
         ],

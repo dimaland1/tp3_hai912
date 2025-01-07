@@ -1,14 +1,38 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'quiz_event.dart';
+import '../../data/repositories/questions_repository.dart';
+import '../events/quiz_event.dart';
 import 'quiz_state.dart';
 
 class QuizBloc extends Bloc<QuizEvent, QuizState> {
-  QuizBloc() : super(QuizState.initial()) {
+  final QuestionsRepository _questionsRepository;
+  final String themeId;
+
+  QuizBloc({required this.themeId, QuestionsRepository? questionsRepository})
+      : _questionsRepository = questionsRepository ?? QuestionsRepository(),
+        super(QuizState.initial()) {
+    on<LoadQuestionsEvent>(_onLoadQuestions);
     on<CheckAnswerEvent>(_onCheckAnswer);
     on<ResetQuizEvent>(_onResetQuiz);
+    add(LoadQuestionsEvent());
+  }
+
+  Future<void> _onLoadQuestions(LoadQuestionsEvent event, Emitter<QuizState> emit) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final questions = await _questionsRepository.getQuestionsByTheme(themeId);
+      emit(state.copyWith(
+        questions: questions,
+        isLoading: false,
+      ));
+    } catch (e) {
+      print('Error loading questions: $e');
+      emit(state.copyWith(isLoading: false));
+    }
   }
 
   void _onCheckAnswer(CheckAnswerEvent event, Emitter<QuizState> emit) {
+    if (state.questions.isEmpty) return;
+
     final currentQuestion = state.questions[state.currentQuestionIndex];
     final newScore = currentQuestion.isCorrect == event.userAnswer
         ? state.score + 1

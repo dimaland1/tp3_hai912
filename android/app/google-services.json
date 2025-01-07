@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "706928221511",
+    "project_id": "tp3-hai912",
+    "storage_bucket": "tp3-hai912.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706928221511:android:65b7e5e763ae7e524d4062",
+        "android_client_info": {
+          "package_name": "com.example.tp1_hai912i"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkozkq94AJPt74boVQdk8zGMRYX0vGq5c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706928221511:android:fa89b0532ed63b4d4d4062",
+        "android_client_info": {
+          "package_name": "com.example.tp3_hai912i"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkozkq94AJPt74boVQdk8zGMRYX0vGq5c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
